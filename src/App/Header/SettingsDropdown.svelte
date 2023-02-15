@@ -21,7 +21,7 @@
 <style>
   .dropdown {
     position: absolute;
-    top: 5rem;
+    top: 6.8rem;
     right: 1.5rem;
     width: 16.5rem;
     background: var(--color-background-1);
