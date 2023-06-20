@@ -104,15 +104,15 @@ test("navigate line numbers", async ({ page }) => {
   await page.locator('text="Plain"').click();
 
   await page.locator('[href="#L5"]').click();
-  await expect(page.locator("#L5")).toHaveClass("line highlight");
+  await expect(page.locator("#L5")).toHaveClass(/highlight/);
   await expect(page).toHaveURL(`${markdownUrl}/tree/main/cheatsheet.md#L5`);
 
   await expectUrlPersistsReload(page);
-  await expect(page.locator("#L5")).toHaveClass("line highlight");
+  await expect(page.locator("#L5")).toHaveClass(/highlight/);
 
   await page.locator('[href="#L30"]').click();
-  await expect(page.locator("#L5")).not.toHaveClass("line highlight");
-  await expect(page.locator("#L30")).toHaveClass("line highlight");
+  await expect(page.locator("#L5")).not.toHaveClass(/highlight/);
+  await expect(page.locator("#L30")).toHaveClass(/highlight/);
   await expect(page).toHaveURL(`${markdownUrl}/tree/main/cheatsheet.md#L30`);
 });
 

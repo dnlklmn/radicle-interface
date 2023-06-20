@@ -1,162 +1,96 @@
-import type { Root } from "@wooorm/starry-night";
-import type { ElementContent } from "hast";
+// TODO: Some thoughts...
+// Parse source code into CST
+// Query should go over the entire CST, instead of a single line.
+//   So we can take into account local scope queries, folding, etc.
+// Calculating the specificity of a selector is a good start.
+//   Should we maybe also check on the pattern index inside a query file?
 
-import onigurumaWASMUrl from "vscode-oniguruma/release/onig.wasm?url";
-import sourceAsciiDoc from "@wooorm/starry-night/lang/text.html.asciidoc";
-import sourceDockerfile from "@wooorm/starry-night/lang/source.dockerfile";
-import sourceErlang from "@wooorm/starry-night/lang/source.erlang.js";
-import sourceSolidity from "@wooorm/starry-night/lang/source.solidity.js";
-import sourceSvelte from "@wooorm/starry-night/lang/source.svelte.js";
-import sourceToml from "@wooorm/starry-night/lang/source.toml";
-import sourceTsx from "@wooorm/starry-night/lang/source.tsx";
-import { createStarryNight, common } from "@wooorm/starry-night";
+import Parser from "web-tree-sitter";
+import treeSitterWasm from "web-tree-sitter/tree-sitter.wasm?url";
 
-export type MaybeHighlighted = Root | undefined;
+export class Syntax {
+  #parser: Parser;
 
-export const grammars = [
-  ...common,
-  sourceSvelte,
-  sourceSolidity,
-  sourceTsx,
-  sourceErlang,
-  sourceDockerfile,
-  sourceAsciiDoc,
-  sourceToml,
-  // A grammar that doesn't do any parsing, but needed for files without a known filetype.
-  {
-    extensions: [""],
-    names: ["raw-format"],
-    patterns: [],
-    scopeName: "text.raw",
-  },
-];
-
-let starryNight: Awaited<ReturnType<typeof createStarryNight>>;
-
-export async function highlight(
-  content: string,
-  grammar: string,
-): Promise<MaybeHighlighted> {
-  if (starryNight === undefined) {
-    starryNight = await createStarryNight(grammars, {
-      getOnigurumaUrlFetch: () => new URL(onigurumaWASMUrl, import.meta.url),
-    });
+  private constructor(parser: Parser) {
+    this.#parser = parser;
   }
-  const scope = starryNight.flagToScope(grammar);
-  return starryNight.highlight(content, scope ?? "text.raw");
-}
 
-export function lineNumbersGutter(tree: Root) {
-  const replacement: ElementContent[] = [];
-  const search = /\r?\n|\r/g;
-  let index = -1;
-  let start = 0;
-  let startTextRemainder = "";
-  let lineNumber = 0;
-
-  while (++index < tree.children.length) {
-    const child = tree.children[index];
-
-    if (child.type === "text") {
-      let textStart = 0;
-      let match = search.exec(child.value);
-
-      while (match) {
-        // Nodes in this line.
-        const line = tree.children.slice(start, index) as ElementContent[];
-
-        // Prepend text from a partial matched earlier text.
-        if (startTextRemainder) {
-          line.unshift({ type: "text", value: startTextRemainder });
-          startTextRemainder = "";
-        }
-
-        // Append text from this text.
-        if (match.index > textStart) {
-          line.push({
-            type: "text",
-            value: child.value.slice(textStart, match.index),
-          });
-        }
-
-        // Add a line, and the eol.
-        lineNumber += 1;
-        replacement.push(createLine(line, lineNumber), {
-          type: "text",
-          value: match[0],
-        });
-
-        start = index + 1;
-        textStart = match.index + match[0].length;
-        match = search.exec(child.value);
-      }
-
-      // If we matched, make sure to not drop the text after the last line ending.
-      if (start === index + 1) {
-        startTextRemainder = child.value.slice(textStart);
-      }
+  public static async init() {
+    try {
+      await Parser.init({
+        locateFile() {
+          return treeSitterWasm;
+        },
+      });
+    } catch (e) {
+      console.error(e);
     }
+    const parser = new Parser();
+
+    return new Syntax(parser);
   }
 
-  const line = tree.children.slice(start) as ElementContent[];
-  // Prepend text from a partial matched earlier text.
-  if (startTextRemainder) {
-    line.unshift({ type: "text", value: startTextRemainder });
-    startTextRemainder = "";
+  public async loadLanguage(lang: string) {
+    const loadedLang = await Parser.Language.load(lang);
+    this.#parser.setLanguage(loadedLang);
   }
 
-  if (line.length > 0) {
-    lineNumber += 1;
-    replacement.push(createLine(line, lineNumber));
+  public async parse(text: string) {
+    return this.#parser.parse(text);
   }
 
-  // Replace children with new array.
-  tree.children = replacement;
-
-  return tree;
+  public query(text: string) {
+    const lang = this.#parser.getLanguage();
+    return lang.query(text);
+  }
 }
 
-function createLine(children: ElementContent[], line: number): ElementContent {
-  return {
-    type: "element",
-    tagName: "tr",
-    properties: {
-      class: "line",
-      id: "L" + line,
-    },
-    children: [
-      {
-        type: "element",
-        tagName: "td",
-        properties: {
-          className: "line-number",
-        },
-        children: [
-          {
-            type: "element",
-            tagName: "a",
-            properties: { href: "#L" + line },
-            children: [{ type: "text", value: line.toString() }],
-          },
-        ],
-      },
-      {
-        type: "element",
-        tagName: "td",
-        properties: {
-          className: "line-content",
-        },
-        children: [
-          {
-            type: "element",
-            tagName: "pre",
-            properties: {
-              className: "content",
-            },
-            children,
-          },
-        ],
-      },
-    ],
-  };
+// Calculate the specificity of a highlight class
+// https://tree-sitter.github.io/tree-sitter/syntax-highlighting#highlight-names
+function calculateSpecificity(tokenName: string) {
+  return tokenName.split(".").length;
+}
+
+export function renderHTML(
+  rootNode: Parser.SyntaxNode,
+  source: string,
+  query: Parser.Query,
+) {
+  const captures = query.captures(rootNode);
+  let highlightedSource: string = "";
+  let currentCursor = 0;
+  const matchedIds: Record<number, string> = {};
+
+  if (captures.length > 0) {
+    captures.forEach(token => {
+      // TODO: Ok this is a work around for rust attributes, which are better matched by punctuations and string..
+      // Will fix this before a merge
+      if (token.name === "attribute") {
+        return;
+      }
+      if (
+        matchedIds[token.node.id] &&
+        calculateSpecificity(token.name) <
+          calculateSpecificity(matchedIds[token.node.id])
+      ) {
+        return;
+      } else if (matchedIds[token.node.id]) {
+        return;
+      }
+      matchedIds[token.node.id] = token.name;
+
+      highlightedSource += source.substring(
+        currentCursor,
+        token.node.startIndex,
+      );
+
+      highlightedSource += `<span class="syntax-${token.name}">${token.node.text}</span>`;
+      currentCursor = token.node.endIndex;
+    });
+  } else {
+    highlightedSource += source;
+  }
+  const lastFoundToken = captures[captures.length - 1];
+  highlightedSource += source.substring(lastFoundToken.node.endIndex);
+  return highlightedSource.split("\n");
 }

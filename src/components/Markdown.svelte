@@ -3,11 +3,9 @@
   import matter from "@radicle/gray-matter";
   import { marked } from "marked";
   import { onMount } from "svelte";
-  import { toDom } from "hast-util-to-dom";
 
   import * as utils from "@app/lib/utils";
   import { base, activeRouteStore } from "@app/lib/router";
-  import { highlight } from "@app/lib/syntax";
   import { isUrl, twemoji, scrollIntoView, canonicalize } from "@app/lib/utils";
   import {
     markdownExtensions as extensions,
@@ -96,15 +94,16 @@
       );
       if (!className) continue;
 
-      treeChanges.push(
-        highlight(node.textContent ?? "", className.slice(prefix.length))
-          .then(tree => {
-            if (tree) {
-              node.replaceChildren(toDom(tree, { fragment: true }));
-            }
-          })
-          .catch(e => console.warn("Not able to highlight code block", e)),
-      );
+      treeChanges
+        .push
+        // highlight(node.textContent ?? "", className.slice(prefix.length))
+        //   .then(tree => {
+        //     if (tree) {
+        //       node.replaceChildren(toDom(tree, { fragment: true }));
+        //     }
+        //   })
+        //   .catch(e => console.warn("Not able to highlight code block", e)),
+        ();
     }
 
     await Promise.allSettled(treeChanges);

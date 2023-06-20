@@ -1,16 +1,24 @@
 <script lang="ts">
+  import type Parser from "web-tree-sitter";
   import type { Blob } from "@httpd-client";
-  import type { MaybeHighlighted } from "@app/lib/syntax";
+
+  import highlightsJs from "tree-sitter-javascript/queries/highlights.scm?raw";
+  import highlightsJson from "@app/lib/syntax/json-query.scm?raw";
+  import highlightsC from "tree-sitter-c/queries/highlights.scm?raw";
+  import highlightsSvelte from "tree-sitter-svelte/queries/highlights.scm?raw";
+  import highlightsRust from "tree-sitter-rust/queries/highlights.scm?raw";
+  import treeSitterJavascript from "@app/lib/syntax/tree-sitter-javascript.wasm?url";
+  import treeSitterC from "@app/lib/syntax/tree-sitter-c.wasm?url";
+  import treeSitterRust from "@app/lib/syntax/tree-sitter-rust.wasm?url";
+  import treeSitterSvelte from "@app/lib/syntax/tree-sitter-svelte.wasm?url";
+  import treeSitterJson from "@app/lib/syntax/tree-sitter-json.wasm?url";
 
   import { afterUpdate, onDestroy, onMount } from "svelte";
-  import { toHtml } from "hast-util-to-html";
-
-  import { highlight } from "@app/lib/syntax";
-  import { isMarkdownPath, twemoji } from "@app/lib/utils";
-  import { lineNumbersGutter } from "@app/lib/syntax";
 
   import Readme from "@app/views/projects/Readme.svelte";
   import SquareButton from "@app/components/SquareButton.svelte";
+  import { Syntax, renderHTML } from "@app/lib/syntax";
+  import { isMarkdownPath, twemoji } from "@app/lib/utils";
 
   export let path: string;
   export let hash: string | undefined = undefined;
@@ -24,18 +32,55 @@
     .match(/^.*\/|/)
     ?.values()
     .next().value;
-  let content: MaybeHighlighted = undefined;
+  let content: string[] = [];
 
   onMount(async () => {
     window.addEventListener("hashchange", setTarget);
     if (!blob.content) {
       return;
     }
-    const output = await highlight(blob.content, fileExtension);
-    if (output) {
-      content = lineNumbersGutter(output);
+
+    try {
+      const syntax = await Syntax.init();
+      let query: Parser.Query | undefined = undefined;
+
+      if (fileExtension === "ts") {
+        await syntax.loadLanguage(treeSitterJavascript);
+        query = syntax.query(highlightsJs);
+      } else if (fileExtension === "js") {
+        await syntax.loadLanguage(treeSitterJavascript);
+        query = syntax.query(highlightsJs);
+      } else if (fileExtension === "c") {
+        await syntax.loadLanguage(treeSitterC);
+        query = syntax.query(highlightsC);
+      } else if (fileExtension === "svelte") {
+        await syntax.loadLanguage(treeSitterSvelte);
+        query = syntax.query(highlightsSvelte);
+      } else if (fileExtension === "json") {
+        await syntax.loadLanguage(treeSitterJson);
+        query = syntax.query(highlightsJson);
+      } else if (fileExtension === "rs") {
+        await syntax.loadLanguage(treeSitterRust);
+        query = syntax.query(highlightsRust);
+      }
+      try {
+        const result = await syntax.parse(blob.content);
+        if (query) {
+          content = renderHTML(result.rootNode, blob.content, query);
+        } else {
+          content = blob.content.split("\n");
+        }
+      } catch (e) {
+        console.error(e);
+        content = blob.content.split("\n");
+      }
+    } catch (e) {
+      console.error(e);
+      content = blob.content.split("\n");
     }
   });
+
+  $: console.log(content);
 
   onDestroy(() => {
     window.removeEventListener("hashchange", setTarget);
@@ -256,7 +301,20 @@
       <Readme content={blob.content} {rawPath} {path} {hash} />
     {:else if content}
       <table class="code no-scrollbar">
-        {@html toHtml(content)}
+        <tbody>
+          <!-- TODO: We should probably look for XSS vulnerabilities here? -->
+          {#each content as line, i}
+            {@const lineNumber = i + 1}
+            <tr class="line" id="L{lineNumber}">
+              <td class="line-number">
+                <a href="#L{lineNumber}">{lineNumber}</a>
+              </td>
+              <td class="line-content">
+                <pre class="content">{@html line}</pre>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
       </table>
     {:else}
       <div class="binary">
