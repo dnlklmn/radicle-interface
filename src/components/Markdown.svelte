@@ -12,6 +12,7 @@
     renderer,
   } from "@app/lib/markdown";
   import { updateProjectRoute } from "@app/views/projects/router";
+  import { Syntax, renderHTML } from "@app/lib/syntax";
 
   export let content: string;
   export let hash: string | undefined = undefined;
@@ -85,28 +86,27 @@
     // Replaces code blocks in the background with highlighted code.
     const prefix = "language-";
     const nodes = Array.from(document.body.querySelectorAll("pre code"));
-
-    const treeChanges: Promise<void>[] = [];
+    const syntax = await Syntax.init();
 
     for (const node of nodes) {
       const className = Array.from(node.classList).find(name =>
         name.startsWith(prefix),
       );
-      if (!className) continue;
-
-      treeChanges
-        .push
-        // highlight(node.textContent ?? "", className.slice(prefix.length))
-        //   .then(tree => {
-        //     if (tree) {
-        //       node.replaceChildren(toDom(tree, { fragment: true }));
-        //     }
-        //   })
-        //   .catch(e => console.warn("Not able to highlight code block", e)),
-        ();
+      if (!className) {
+        continue;
+      }
+      const query = await syntax.getQuery(className.slice(prefix.length));
+      if (query) {
+        const result = await syntax.parse(node.textContent ?? "");
+        const captures = query.captures(result.rootNode);
+        const content = renderHTML(captures, node.textContent ?? "");
+        const parser = new DOMParser().parseFromString(
+          content.join("\n"),
+          "text/html",
+        );
+        node.replaceChildren(...Array.from(parser.body.childNodes));
+      }
     }
-
-    await Promise.allSettled(treeChanges);
   });
 </script>
 

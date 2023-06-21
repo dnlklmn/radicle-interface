@@ -8,6 +8,17 @@
 import Parser from "web-tree-sitter";
 import treeSitterWasm from "web-tree-sitter/tree-sitter.wasm?url";
 
+import highlightsJs from "tree-sitter-javascript/queries/highlights.scm?raw";
+import highlightsJson from "@app/lib/syntax/json-query.scm?raw";
+import highlightsC from "tree-sitter-c/queries/highlights.scm?raw";
+import highlightsSvelte from "tree-sitter-svelte/queries/highlights.scm?raw";
+import highlightsRust from "tree-sitter-rust/queries/highlights.scm?raw";
+import treeSitterJavascript from "@app/lib/syntax/tree-sitter-javascript.wasm?url";
+import treeSitterC from "@app/lib/syntax/tree-sitter-c.wasm?url";
+import treeSitterRust from "@app/lib/syntax/tree-sitter-rust.wasm?url";
+import treeSitterSvelte from "@app/lib/syntax/tree-sitter-svelte.wasm?url";
+import treeSitterJson from "@app/lib/syntax/tree-sitter-json.wasm?url";
+
 export class Syntax {
   #parser: Parser;
 
@@ -43,6 +54,28 @@ export class Syntax {
     const lang = this.#parser.getLanguage();
     return lang.query(text);
   }
+
+  public async getQuery(fileExtension: string) {
+    if (fileExtension === "ts") {
+      await this.loadLanguage(treeSitterJavascript);
+      return this.query(highlightsJs);
+    } else if (fileExtension === "js") {
+      await this.loadLanguage(treeSitterJavascript);
+      return this.query(highlightsJs);
+    } else if (fileExtension === "c") {
+      await this.loadLanguage(treeSitterC);
+      return this.query(highlightsC);
+    } else if (fileExtension === "svelte") {
+      await this.loadLanguage(treeSitterSvelte);
+      return this.query(highlightsSvelte);
+    } else if (fileExtension === "json") {
+      await this.loadLanguage(treeSitterJson);
+      return this.query(highlightsJson);
+    } else if (fileExtension === "rs") {
+      await this.loadLanguage(treeSitterRust);
+      return this.query(highlightsRust);
+    }
+  }
 }
 
 // Calculate the specificity of a highlight class
@@ -51,12 +84,7 @@ function calculateSpecificity(tokenName: string) {
   return tokenName.split(".").length;
 }
 
-export function renderHTML(
-  rootNode: Parser.SyntaxNode,
-  source: string,
-  query: Parser.Query,
-) {
-  const captures = query.captures(rootNode);
+export function renderHTML(captures: Parser.QueryCapture[], source: string) {
   let highlightedSource: string = "";
   let currentCursor = 0;
   const matchedIds: Record<number, string> = {};

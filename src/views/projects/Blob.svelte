@@ -1,17 +1,5 @@
 <script lang="ts">
-  import type Parser from "web-tree-sitter";
   import type { Blob } from "@httpd-client";
-
-  import highlightsJs from "tree-sitter-javascript/queries/highlights.scm?raw";
-  import highlightsJson from "@app/lib/syntax/json-query.scm?raw";
-  import highlightsC from "tree-sitter-c/queries/highlights.scm?raw";
-  import highlightsSvelte from "tree-sitter-svelte/queries/highlights.scm?raw";
-  import highlightsRust from "tree-sitter-rust/queries/highlights.scm?raw";
-  import treeSitterJavascript from "@app/lib/syntax/tree-sitter-javascript.wasm?url";
-  import treeSitterC from "@app/lib/syntax/tree-sitter-c.wasm?url";
-  import treeSitterRust from "@app/lib/syntax/tree-sitter-rust.wasm?url";
-  import treeSitterSvelte from "@app/lib/syntax/tree-sitter-svelte.wasm?url";
-  import treeSitterJson from "@app/lib/syntax/tree-sitter-json.wasm?url";
 
   import { afterUpdate, onDestroy, onMount } from "svelte";
 
@@ -42,31 +30,13 @@
 
     try {
       const syntax = await Syntax.init();
-      let query: Parser.Query | undefined = undefined;
+      const query = await syntax.getQuery(fileExtension);
 
-      if (fileExtension === "ts") {
-        await syntax.loadLanguage(treeSitterJavascript);
-        query = syntax.query(highlightsJs);
-      } else if (fileExtension === "js") {
-        await syntax.loadLanguage(treeSitterJavascript);
-        query = syntax.query(highlightsJs);
-      } else if (fileExtension === "c") {
-        await syntax.loadLanguage(treeSitterC);
-        query = syntax.query(highlightsC);
-      } else if (fileExtension === "svelte") {
-        await syntax.loadLanguage(treeSitterSvelte);
-        query = syntax.query(highlightsSvelte);
-      } else if (fileExtension === "json") {
-        await syntax.loadLanguage(treeSitterJson);
-        query = syntax.query(highlightsJson);
-      } else if (fileExtension === "rs") {
-        await syntax.loadLanguage(treeSitterRust);
-        query = syntax.query(highlightsRust);
-      }
       try {
         const result = await syntax.parse(blob.content);
         if (query) {
-          content = renderHTML(result.rootNode, blob.content, query);
+          const captures = query.captures(result.rootNode);
+          content = renderHTML(captures, blob.content);
         } else {
           content = blob.content.split("\n");
         }
