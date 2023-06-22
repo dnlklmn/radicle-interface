@@ -280,7 +280,7 @@
                 <a href="#L{lineNumber}">{lineNumber}</a>
               </td>
               <td class="line-content">
-                <pre class="content">{@html line}</pre>
+                <pre class="content">{line}</pre>
               </td>
             </tr>
           {/each}
