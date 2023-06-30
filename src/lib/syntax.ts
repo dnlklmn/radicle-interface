@@ -11,7 +11,7 @@ import treeSitterWasm from "web-tree-sitter/tree-sitter.wasm?url";
 import highlightsJs from "tree-sitter-javascript/queries/highlights.scm?raw";
 import highlightsJson from "@app/lib/syntax/json-query.scm?raw";
 import highlightsC from "tree-sitter-c/queries/highlights.scm?raw";
-import highlightsSvelte from "tree-sitter-svelte/queries/highlights.scm?raw";
+import highlightsSvelte from "@app/lib/syntax/svelte-query.scm?raw";
 import highlightsRust from "tree-sitter-rust/queries/highlights.scm?raw";
 import treeSitterJavascript from "@app/lib/syntax/tree-sitter-javascript.wasm?url";
 import treeSitterC from "@app/lib/syntax/tree-sitter-c.wasm?url";
@@ -91,11 +91,12 @@ export function renderHTML(captures: Parser.QueryCapture[], source: string) {
 
   if (captures.length > 0) {
     captures.forEach(token => {
-      // TODO: Ok this is a work around for rust attributes, which are better matched by punctuations and string..
-      // Will fix this before a merge
-      if (token.name === "attribute") {
+      // If the current cursor already passed, the new token, just return early
+      if (token.node.startIndex < currentCursor) {
         return;
       }
+      // If there are two tokens with the same id,
+      // and the new one is lower in specificity just return early.
       if (
         matchedIds[token.node.id] &&
         calculateSpecificity(token.name) <

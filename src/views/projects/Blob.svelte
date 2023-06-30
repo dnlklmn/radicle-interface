@@ -50,8 +50,6 @@
     }
   });
 
-  $: console.log(content);
-
   onDestroy(() => {
     window.removeEventListener("hashchange", setTarget);
   });

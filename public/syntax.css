@@ -82,19 +82,32 @@
   color: var(--color-syntax-comment);
 }
 
-.syntax-constructor,
-.syntax-variable\.parameter {
+.syntax-constructor {
   color: var(--color-syntax-variable);
+}
+.syntax-label {
+  color: var(--color-syntax-entity-tag);
+}
+.syntax-variable {
+  .parameter {
+    color: var(--color-syntax-variable);
+  }
 }
 
 .syntax-property,
-.syntax-type,
 .syntax-number,
-.syntax-type\.builtin,
-.syntax-constant\.builtin {
+.builtin {
   color: var(--color-syntax-constant);
 }
 
-.syntax-string\.special\.key {
-  color: var(--color-syntax-entity-tag);
+.syntax-string {
+  .special {
+    .key {
+      color: var(--color-syntax-entity-tag);
+    }
+  }
+}
+
+.syntax-function\.macro {
+  color: var(--color-syntax-entity);
 }
