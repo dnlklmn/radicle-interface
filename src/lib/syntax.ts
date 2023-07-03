@@ -92,6 +92,7 @@ export function renderHTML(captures: Parser.QueryCapture[], source: string) {
   if (captures.length > 0) {
     captures.forEach(token => {
       // If the current cursor already passed, the new token, just return early
+      // We should probably do some iteration over the different layers of highlighting
       if (token.node.startIndex < currentCursor) {
         return;
       }
@@ -113,7 +114,10 @@ export function renderHTML(captures: Parser.QueryCapture[], source: string) {
         token.node.startIndex,
       );
 
-      highlightedSource += `<span class="syntax-${token.name}">${token.node.text}</span>`;
+      highlightedSource += `<span class="syntax ${token.name.replace(
+        ".",
+        " ",
+      )}">${token.node.text}</span>`;
       currentCursor = token.node.endIndex;
     });
   } else {
