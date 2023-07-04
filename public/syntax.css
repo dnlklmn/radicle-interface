@@ -78,6 +78,7 @@
   color: var(--color-syntax-string);
 }
 
+.syntax.attribute,
 .syntax.comment {
   color: var(--color-syntax-comment);
 }

@@ -10,11 +10,13 @@ import treeSitterWasm from "web-tree-sitter/tree-sitter.wasm?url";
 
 import highlightsJs from "tree-sitter-javascript/queries/highlights.scm?raw";
 import highlightsJson from "@app/lib/syntax/json-query.scm?raw";
+import highlightsHtml from "@app/lib/syntax/html-highlights.scm?raw";
 import highlightsC from "tree-sitter-c/queries/highlights.scm?raw";
 import highlightsSvelte from "@app/lib/syntax/svelte-query.scm?raw";
 import highlightsRust from "tree-sitter-rust/queries/highlights.scm?raw";
 import treeSitterJavascript from "@app/lib/syntax/tree-sitter-javascript.wasm?url";
 import treeSitterC from "@app/lib/syntax/tree-sitter-c.wasm?url";
+import treeSitterHtml from "@app/lib/syntax/tree-sitter-html.wasm?url";
 import treeSitterRust from "@app/lib/syntax/tree-sitter-rust.wasm?url";
 import treeSitterSvelte from "@app/lib/syntax/tree-sitter-svelte.wasm?url";
 import treeSitterJson from "@app/lib/syntax/tree-sitter-json.wasm?url";
@@ -71,6 +73,9 @@ export class Syntax {
     } else if (fileExtension === "json") {
       await this.loadLanguage(treeSitterJson);
       return this.query(highlightsJson);
+    } else if (fileExtension === "html") {
+      await this.loadLanguage(treeSitterHtml);
+      return this.query(highlightsHtml);
     } else if (fileExtension === "rs") {
       await this.loadLanguage(treeSitterRust);
       return this.query(highlightsRust);

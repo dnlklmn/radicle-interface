@@ -16,6 +16,11 @@
   $: fileExtension = blob.path.split(".").pop() ?? "";
   $: lastCommit = blob.lastCommit;
 
+  // Custom sanitizer function to escape HTML
+const escapeHtml = (unsafeHtml: string) => {
+  return unsafeHtml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+};
+
   const parentDir = blob.path
     .match(/^.*\/|/)
     ?.values()
@@ -278,7 +283,7 @@
                 <a href="#L{lineNumber}">{lineNumber}</a>
               </td>
               <td class="line-content">
-                <pre class="content">{line}</pre>
+                <pre class="content">{@html escapeHtml(line)}</pre>
               </td>
             </tr>
           {/each}
