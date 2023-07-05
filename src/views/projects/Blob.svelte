@@ -17,9 +17,6 @@
   $: lastCommit = blob.lastCommit;
 
   // Escape HTML
-const escapeHtml = (unsafeHtml: string) => {
-  return unsafeHtml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-};
 
   const parentDir = blob.path
     .match(/^.*\/|/)
@@ -283,7 +280,7 @@ const escapeHtml = (unsafeHtml: string) => {
                 <a href="#L{lineNumber}">{lineNumber}</a>
               </td>
               <td class="line-content">
-                <pre class="content">{@html escapeHtml(line)}</pre>
+                <pre class="content">{@html line}</pre>
               </td>
             </tr>
           {/each}

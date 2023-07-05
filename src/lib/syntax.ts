@@ -115,7 +115,7 @@ export function renderHTML(captures: Parser.QueryCapture[], source: string) {
       highlightedSource += `<span class="syntax ${token.name.replace(
         ".",
         " ",
-      )}">${token.node.text}</span>`;
+      )}">${escapeHtml(token.node.text)}</span>`;
       currentCursor = token.node.endIndex;
     });
   } else {
@@ -125,3 +125,7 @@ export function renderHTML(captures: Parser.QueryCapture[], source: string) {
   highlightedSource += source.substring(lastFoundToken.node.endIndex);
   return highlightedSource.split("\n");
 }
+
+const escapeHtml = (unsafeHtml: string) => {
+  return unsafeHtml.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+};
