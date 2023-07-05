@@ -126,6 +126,6 @@ export function renderHTML(captures: Parser.QueryCapture[], source: string) {
   return highlightedSource.split("\n");
 }
 
-const escapeHtml = (unsafeHtml: string) => {
+export function escapeHtml(unsafeHtml: string) {
   return unsafeHtml.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-};
+}

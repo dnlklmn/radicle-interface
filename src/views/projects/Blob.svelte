@@ -5,7 +5,7 @@
 
   import Readme from "@app/views/projects/Readme.svelte";
   import SquareButton from "@app/components/SquareButton.svelte";
-  import { Syntax, renderHTML } from "@app/lib/syntax";
+  import { Syntax, escapeHtml, renderHTML } from "@app/lib/syntax";
   import { isMarkdownPath, twemoji } from "@app/lib/utils";
 
   export let path: string;
@@ -40,15 +40,15 @@
           const captures = query.captures(result.rootNode);
           content = renderHTML(captures, blob.content);
         } else {
-          content = blob.content.split("\n");
+          content = escapeHtml(blob.content).split("\n");
         }
       } catch (e) {
         console.error(e);
-        content = blob.content.split("\n");
+        content = escapeHtml(blob.content).split("\n");
       }
     } catch (e) {
       console.error(e);
-      content = blob.content.split("\n");
+      content = escapeHtml(blob.content).split("\n");
     }
   });
 
