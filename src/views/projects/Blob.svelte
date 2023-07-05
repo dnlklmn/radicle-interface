@@ -16,7 +16,7 @@
   $: fileExtension = blob.path.split(".").pop() ?? "";
   $: lastCommit = blob.lastCommit;
 
-  // Custom sanitizer function to escape HTML
+  // Escape HTML
 const escapeHtml = (unsafeHtml: string) => {
   return unsafeHtml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 };

@@ -1,19 +1,12 @@
-// TODO: Some thoughts...
-// Parse source code into CST
-// Query should go over the entire CST, instead of a single line.
-//   So we can take into account local scope queries, folding, etc.
-// Calculating the specificity of a selector is a good start.
-//   Should we maybe also check on the pattern index inside a query file?
-
 import Parser from "web-tree-sitter";
 import treeSitterWasm from "web-tree-sitter/tree-sitter.wasm?url";
 
-import highlightsJs from "tree-sitter-javascript/queries/highlights.scm?raw";
-import highlightsJson from "@app/lib/syntax/json-query.scm?raw";
+import highlightsJs from "@app/lib/syntax/js-highlights.scm?raw";
+import highlightsJson from "@app/lib/syntax/json-highlights.scm?raw";
 import highlightsHtml from "@app/lib/syntax/html-highlights.scm?raw";
-import highlightsC from "tree-sitter-c/queries/highlights.scm?raw";
-import highlightsSvelte from "@app/lib/syntax/svelte-query.scm?raw";
-import highlightsRust from "tree-sitter-rust/queries/highlights.scm?raw";
+import highlightsC from "@app/lib/syntax/c-highlights.scm?raw";
+import highlightsSvelte from "@app/lib/syntax/svelte-highlights.scm?raw";
+import highlightsRust from "@app/lib/syntax/rust-highlights.scm?raw";
 import treeSitterJavascript from "@app/lib/syntax/tree-sitter-javascript.wasm?url";
 import treeSitterC from "@app/lib/syntax/tree-sitter-c.wasm?url";
 import treeSitterHtml from "@app/lib/syntax/tree-sitter-html.wasm?url";
