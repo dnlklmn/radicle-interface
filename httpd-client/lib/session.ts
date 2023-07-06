@@ -40,6 +40,17 @@ export class Client {
     );
   }
 
+  public async create(options?: RequestOptions): Promise<Session> {
+    return this.#fetcher.fetchOk(
+      {
+        method: "POST",
+        path: "sessions",
+        options,
+      },
+      sessionSchema,
+    );
+  }
+
   public async update(
     id: string,
     body: {
