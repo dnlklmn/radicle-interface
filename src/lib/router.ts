@@ -1,15 +1,12 @@
 import type { BaseUrl } from "@httpd-client";
 import type { LoadedRoute, Route } from "@app/lib/router/definitions";
 
-import { get, writable } from "svelte/store";
+import { writable } from "svelte/store";
 
 import * as mutexExecutor from "@app/lib/mutexExecutor";
 import * as utils from "@app/lib/utils";
 import { config } from "@app/lib/config";
-import {
-  createProjectRoute,
-  resolveProjectRoute,
-} from "@app/views/projects/router";
+import { resolveProjectRoute } from "@app/views/projects/router";
 import { loadRoute } from "@app/lib/router/definitions";
 
 export { type Route };
@@ -59,22 +56,9 @@ export async function loadFromLocation(): Promise<void> {
 
   const relativeUrl = pathname + window.location.search + (hash || "");
   const url = new URL(relativeUrl, window.origin);
-  let route = pathToRoute(url);
+  const route = pathToRoute(url);
 
   if (route) {
-    const activeRoute = get(activeRouteStore);
-    if (
-      activeRoute.resource === "projects" &&
-      route.resource === "projects" &&
-      route.params.hash
-    ) {
-      if (route.params.hash.match(/^L\d+$/)) {
-        route = createProjectRoute(activeRoute, {});
-      } else {
-        route = createProjectRoute(activeRoute, { hash: route.params.hash });
-      }
-    }
-
     await replace(route);
   } else {
     await replace({ resource: "notFound", params: { url: relativeUrl } });
@@ -97,7 +81,7 @@ async function navigate(
   if (action === "push") {
     window.history.pushState(newRoute, DOCUMENT_TITLE, path);
   } else if (action === "replace") {
-    window.history.replaceState(newRoute, DOCUMENT_TITLE, path);
+    window.history.replaceState(newRoute, DOCUMENT_TITLE);
   }
   currentUrl = new URL(window.location.href);
 
