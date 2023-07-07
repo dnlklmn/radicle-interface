@@ -1,22 +1,24 @@
 import type { HttpdClient } from "@httpd-client";
+import type { RadiclePeer } from "@tests/support/peerManager";
 
-import * as Path from "node:path";
-import { execa } from "execa";
-import { tmpDir } from "@tests/support/support";
+import { sessionPayloadSchema } from "@httpd-client/lib/session";
 
-export async function authenticate(api: HttpdClient): Promise<string> {
-  const { stdout } = await execa("rad", ["web", "--json"], {
-    env: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      RAD_HOME: Path.join(tmpDir, "peers", "palm", "home"),
-    },
+export async function authenticate(
+  api: HttpdClient,
+  peer: RadiclePeer,
+): Promise<string> {
+  const { stdout } = await peer.rad(["web", "--json"]);
+  const session = sessionPayloadSchema.safeParse(JSON.parse(stdout));
+
+  if (!session.success) {
+    throw new Error("Failed to parse session payload");
+  }
+
+  const { sessionId, signature, publicKey } = session.data;
+  await api.session.update(sessionId, {
+    sig: signature,
+    pk: publicKey,
   });
-  const session: { sessionId: string; signature: string; publicKey: string } =
-    JSON.parse(stdout);
-  await api.session.update(session.sessionId, {
-    sig: session.signature,
-    pk: session.publicKey,
-  });
 
-  return session.sessionId;
+  return sessionId;
 }

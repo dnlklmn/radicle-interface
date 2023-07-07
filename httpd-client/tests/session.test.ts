@@ -14,6 +14,7 @@ describe("session", () => {
     await api.session.getById(id);
   });
 
+  // TODO: We have the endpoint ready, but we need to figure out how to sign the session payload.
   test.todo("#update(id, {sig, pk})");
 
   test("#delete(id)", async () => {

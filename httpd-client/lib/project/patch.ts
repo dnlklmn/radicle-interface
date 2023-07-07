@@ -1,5 +1,5 @@
 import type { Comment, ThreadUpdateAction } from "./comment.js";
-import type { ZodSchema } from "zod";
+import type { ZodSchema, z } from "zod";
 
 import { commentSchema } from "./comment.js";
 
@@ -169,28 +169,19 @@ export type PatchUpdateAction =
   | { type: "merge"; revision: string; commit: string }
   | { type: "thread"; revision: string; action: ThreadUpdateAction };
 
-export interface PatchCreate {
-  title: string;
-  description: string;
-  target: string;
-  oid: string;
-  tags: string[];
-}
-
 export const patchCreateSchema = object({
   title: string(),
   description: string(),
   target: string(),
   oid: string(),
   tags: array(string()),
-}) satisfies ZodSchema<PatchCreate>;
+});
 
-export interface PatchCreated {
-  success: boolean;
-  id: string;
-}
+export type PatchCreate = z.infer<typeof patchCreateSchema>;
 
 export const patchCreatedSchema = object({
   success: boolean(),
   id: string(),
-}) satisfies ZodSchema<PatchCreated>;
+});
+
+export type PatchCreated = z.infer<typeof patchCreatedSchema>;
