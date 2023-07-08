@@ -34,7 +34,7 @@
     background: var(--color-background-1);
     border-radius: var(--border-radius);
     box-shadow: var(--elevation-low);
-    color: var(--color-foreground-6);
+    color: var(--foreground-contrast);
     position: absolute;
     right: 5rem;
     top: 5rem;

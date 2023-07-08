@@ -20,7 +20,7 @@
 <style>
   .title {
     align-items: center;
-    color: var(--color-secondary);
+    color: var(--foreground-contrast);
     display: flex;
     font-size: var(--font-size-x-large);
     font-weight: var(--font-weight-bold);
@@ -47,8 +47,8 @@
   }
   .id {
     font-family: var(--font-family-monospace);
-    font-size: var(--font-size-tiny);
-    color: var(--color-foreground-5);
+    font-size: var(--font-size-regular);
+    color: var(--foreground-emphasized);
     overflow-wrap: anywhere;
     display: flex;
     justify-content: left;

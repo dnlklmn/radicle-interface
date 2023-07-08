@@ -75,8 +75,7 @@
   }
   input {
     background: transparent;
-    border-radius: var(--border-radius-round);
-    color: var(--color-foreground);
+    color: var(--foreground-contrast);
     font-size: inherit;
     font-family: var(--font-family-sans-serif);
     height: var(--button-regular-height);
@@ -87,7 +86,7 @@
     width: 100%;
   }
   input::placeholder {
-    color: var(--color-secondary);
+    color: var(--foreground-emphasized);
     opacity: 1 !important;
   }
   input[disabled] {
@@ -95,7 +94,8 @@
     cursor: not-allowed;
   }
   .regular {
-    border: 1px solid var(--color-secondary);
+    border: none;
+    box-shadow: inset 0 0 0 1px var(--border-hint);
     padding: 1rem 1.5rem;
   }
   .form,

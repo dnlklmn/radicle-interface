@@ -11,9 +11,8 @@
   article {
     padding: 2rem;
     width: 100%;
-    background: var(--color-background-1);
-    border-bottom-left-radius: var(--border-radius-small);
-    border-bottom-right-radius: var(--border-radius-small);
+    background-color: var(--background-float);
+    /* background: var(--color-background-1); */
   }
 </style>
 

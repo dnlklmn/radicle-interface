@@ -81,6 +81,7 @@
 <style>
   .search-bar {
     display: flex;
+    color: var(--foreground-emphasized);
   }
   .shaking {
     animation: horizontal-shaking 0.35s;

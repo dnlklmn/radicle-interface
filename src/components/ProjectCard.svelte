@@ -24,6 +24,7 @@
     min-width: 36rem;
     cursor: pointer;
     background: var(--background-float);
+    color: var(--foreground-contrast);
   }
   .right {
     display: flex;
@@ -33,6 +34,9 @@
   }
   .left {
     width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
   .description {
     overflow-x: hidden;
@@ -60,7 +64,6 @@
     background-color: var(--background-default);
   }
   .description {
-    margin-bottom: 0.25rem;
     font-size: var(--font-size-small);
   }
   .stateHash {
@@ -79,7 +82,6 @@
     justify-content: space-between;
     font-size: var(--font-size-regular);
     font-weight: var(--font-weight-medium);
-    margin-bottom: 0.5rem;
   }
   .rid {
     visibility: hidden;
