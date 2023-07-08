@@ -19,12 +19,11 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 1rem;
-    border: 1px solid var(--color-secondary-5);
-    border-radius: var(--border-radius-small);
+    padding: 1rem 1rem 0.25rem 1rem;
+    box-shadow: inset 0 0 0 1px var(--border-hint);
     min-width: 36rem;
     cursor: pointer;
-    background: var(--color-background-1);
+    background: var(--background-float);
   }
   .right {
     display: flex;
@@ -42,7 +41,6 @@
   }
   .compact {
     min-width: 16rem;
-    height: 9rem;
   }
   .compact .left {
     width: 100%;
@@ -58,20 +56,23 @@
     max-width: 14rem;
   }
   .project:hover {
-    border-color: var(--color-secondary);
-    background-color: var(--color-secondary-1);
+    box-shadow: inset 0 0 0 2px var(--border-focus);
+    background-color: var(--background-default);
   }
   .description {
     margin-bottom: 0.25rem;
-    font-size: var(--font-size-tiny);
+    font-size: var(--font-size-small);
   }
   .stateHash {
-    color: var(--color-secondary);
-    font-size: var(--font-size-tiny);
+    background-color: var(--fill-light);
+    padding: 0.25rem 0.25rem;
+    color: var(--foreground-match-background);
+    font-size: var(--font-size-small);
     font-family: var(--font-family-monospace);
-    min-height: 2rem;
-    display: flex;
-    align-items: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+    width: fit-content;
   }
   .id {
     display: flex;
